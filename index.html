@@ -1,11 +1,516 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Mounir Amdouni - Digital Card</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        primary: {
+                            DEFAULT: '#2563eb', // Blue 600
+                            light: '#60a5fa',   // Blue 400
+                            dark: '#1d4ed8',    // Blue 700
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+            position: relative;
+        }
+        /* Background Animation Canvas */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Ambient Background Blobs */
+        .ambient-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: blob-bounce 10s infinite alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: rgba(37, 99, 235, 0.4); } /* Blue */
+        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: rgba(147, 51, 234, 0.4); } /* Purple */
+        .blob-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: rgba(56, 189, 248, 0.3); } /* Sky */
+
+        @keyframes blob-bounce {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, -20px) scale(1.1); }
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.6); 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .proj-img {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .proj-img:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-color: #38bdf8;
+        }
+
+        [lang="en"], [lang="fr"] { display: none; }
+    </style>
 </head>
-<body>
-    <center>Hello World, Je suis Mounir</center>
+<body class="bg-gray-50 text-slate-800 dark:bg-[#0B1120] dark:text-slate-100 font-cairo transition-colors duration-300 overflow-x-hidden">
+
+    <!-- Ambient Blobs -->
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2"></div>
+    <div class="ambient-blob blob-3 hidden md:block"></div>
+
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Controls (Lang + Theme) -->
+    <div class="fixed top-5 left-5 z-50 flex flex-col gap-3">
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-full glass-card hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            <i class="fas fa-moon hidden dark:block text-yellow-400"></i>
+            <i class="fas fa-sun block dark:hidden text-orange-500"></i>
+        </button>
+        
+        <!-- Lang Switcher -->
+        <div class="flex flex-col gap-1 p-1 rounded-lg glass-card">
+            <button onclick="setLanguage('ar')" class="px-2 py-1 text-xs rounded hover:bg-primary hover:text-white transition font-bold" id="btn-ar">AR</button>
+            <button onclick="setLanguage('fr')" class="px-2 py-1 text-xs rounded hover:bg-primary hover:text-white transition font-bold" id="btn-fr">FR</button>
+            <button onclick="setLanguage('en')" class="px-2 py-1 text-xs rounded hover:bg-primary hover:text-white transition font-bold" id="btn-en">EN</button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-12 max-w-5xl">
+        
+        <!-- Header -->
+        <header class="text-center mb-16">
+            <div class="relative inline-block mb-6">
+                <div class="w-40 h-40 rounded-full p-1 bg-gradient-to-tr from-primary to-purple-500 mx-auto">
+                    <img src="assets/MyImage.jpeg" alt="Mounir Amdouni" class="w-full h-full object-cover rounded-full border-4 border-slate-50 dark:border-slate-900 bg-white">
+                </div>
+                <div class="absolute bottom-2 right-4 w-6 h-6 bg-green-500 border-4 border-slate-50 dark:border-slate-900 rounded-full"></div>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 text-slate-900 dark:text-white">Mounir Amdouni</h1>
+            <p class="text-xl text-primary font-medium mb-6">
+                <span lang="ar">طالب ومؤسس مشاريع تقنية</span>
+                <span lang="fr">Étudiant & Fondateur Tech</span>
+                <span lang="en">Student & Tech Founder</span>
+            </p>
+
+            <!-- Bio Paragraph -->
+            <div class="relative max-w-3xl mx-auto mb-16 p-8 rounded-2xl glass-card border border-white/10 shadow-2xl transform transition hover:scale-[1.02] duration-300">
+                <!-- Quote Icon -->
+                <i class="fas fa-quote-right absolute -top-4 right-8 text-4xl text-primary bg-slate-50 dark:bg-slate-900 rounded-full p-2 border border-primary/20"></i>
+                
+                <div class="text-center relative z-10">
+                    <p class="text-lg md:text-xl font-medium text-slate-700 dark:text-slate-200 leading-loose" lang="ar">
+                        أطور تطبيقات لتقديم حلول للمشاكل وتسهيل الحياة، دائماً بلمسة إبداعية خاصة وشغف بالابتكار.
+                    </p>
+                    <p class="text-lg md:text-xl font-medium text-slate-700 dark:text-slate-200 leading-loose" lang="fr">
+                        Je crée des applications pour résoudre des problèmes concrets et vous faciliter la vie, toujours avec créativité et ma touche personnelle.
+                    </p>
+                    <p class="text-lg md:text-xl font-medium text-slate-700 dark:text-slate-200 leading-loose" lang="en">
+                        I create apps to make solutions for problems and make your life easier, always with creativity and my own touch.
+                    </p>
+                </div>
+                
+                <!-- Bottom Decoration -->
+                <div class="w-16 h-1 bg-gradient-to-r from-primary to-purple-500 mx-auto mt-6 rounded-full"></div>
+            </div>
+
+            <div class="flex justify-center gap-6 text-2xl text-slate-500 dark:text-slate-400">
+                <a href="mailto:mouniramdouni04@gmail.com" class="hover:text-primary transition transform hover:scale-110"><i class="fas fa-envelope"></i></a>
+                <a href="tel:23647170" class="hover:text-primary transition transform hover:scale-110"><i class="fas fa-phone"></i></a>
+                <a href="https://www.linkedin.com/in/mounir-amdouni-0919a1369/" target="_blank" class="hover:text-primary transition transform hover:scale-110"><i class="fab fa-linkedin"></i></a>
+                <a href="https://www.facebook.com/mounir.amdouni.980091" target="_blank" class="hover:text-primary transition transform hover:scale-110"><i class="fab fa-facebook"></i></a>
+            </div>
+        </header>
+
+        <!-- Visual Flow (Arrows) -->
+        <div class="hidden md:flex items-center justify-center mb-12 opacity-50">
+            <div class="w-32 h-[2px] bg-gradient-to-l from-primary to-transparent"></div>
+            <i class="fas fa-code text-primary mx-4 text-xl"></i>
+            <div class="w-32 h-[2px] bg-gradient-to-r from-primary to-transparent"></div>
+        </div>
+
+        <!-- Projects Grid -->
+        <div class="grid md:grid-cols-2 gap-12 md:gap-16">
+
+            <!-- PROJECT 1: HANOUTI -->
+            <article class="glass-card rounded-2xl p-6 md:p-8 hover:shadow-xl transition duration-300 relative group border-t-4 border-primary">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-primary">
+                        <i class="fas fa-store text-xl"></i>
+                    </span>
+                    <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">Hanouti</h2>
+                </div>
+
+                <!-- Text Content -->
+                <div class="mb-6 space-y-4">
+                    <div lang="ar">
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-2">سوق التجار المتعدد - Marketplace</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                            منصة تجارة إلكترونية متكاملة بنظام "Place de Marché" (Marketplace) تربط بين ثلاثة أطراف: المسؤولين، التجار، والعملاء، لتوفير تجربة رقمية شاملة.
+                        </p>
+                        <h4 class="font-semibold text-primary dark:text-blue-400 text-sm mb-1"><i class="fas fa-user-tag ml-2"></i>للبائعين (التجار):</h4>
+                        <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 mb-3 pr-2">
+                            <li>لوحة تحكم (Dashboard) شاملة للإحصائيات والمبيعات.</li>
+                            <li>إدارة ذاتية للمخزون، المنتجات، والصور.</li>
+                            <li>تخصيص هوية المتجر (شعار، غلاف، بيانات).</li>
+                            <li>ميزة <strong>"الطلبات المحلية"</strong> لدمج مبيعات المحل الفعلي.</li>
+                        </ul>
+
+                        <h4 class="font-semibold text-primary dark:text-blue-400 text-sm mb-1"><i class="fas fa-shopping-cart ml-2"></i>للعملاء (المتسوقين):</h4>
+                        <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 pr-2">
+                            <li>بحث متقدم وتصفية المنتجات حسب السعر والتقييم.</li>
+                            <li>شفافية تامة: الاطلاع على تقييمات البائعين والمنتجات.</li>
+                            <li>تتبع حالة الطلب لحظة بلحظة (قيد الانتظار، الشحن).</li>
+                        </ul>
+                    </div>
+                    <div lang="fr">
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-2">Souq Al-Tujjar - Marketplace</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                            Une solution "Marketplace" complète agissant comme un écosystème commercial unifié reliant Administrateurs, Vendeurs indépendants et Clients.
+                        </p>
+                        <h4 class="font-semibold text-primary dark:text-blue-400 text-sm mb-1"><i class="fas fa-user-tag mr-2"></i>Pour les Vendeurs :</h4>
+                        <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 mb-3 pl-2">
+                            <li>Tableau de bord (Dashboard) synoptique complet.</li>
+                            <li>Gestion autonome du catalogue (CRUD produits, stocks).</li>
+                            <li>Personnalisation de la boutique (Logo, Bannière).</li>
+                            <li>Module <strong>"Commandes Locales"</strong> pour unifier les ventes physiques et web.</li>
+                        </ul>
+
+                        <h4 class="font-semibold text-primary dark:text-blue-400 text-sm mb-1"><i class="fas fa-shopping-cart mr-2"></i>Pour les Clients :</h4>
+                        <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 pl-2">
+                            <li>Recherche avancée et filtres dynamiques.</li>
+                            <li>Transparence via profils vendeurs et avis certifiés.</li>
+                            <li>Suivi de commande en temps réel.</li>
+                        </ul>
+                    </div>
+                    <div lang="en">
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-2">Souq Al-Tujjar - Marketplace</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                            A robust multi-vendor marketplace solution serving as a unified digital ecosystem connecting Admins, Independent Sellers, and Customers.
+                        </p>
+                        <h4 class="font-semibold text-primary dark:text-blue-400 text-sm mb-1"><i class="fas fa-user-tag mr-2"></i>For Sellers:</h4>
+                        <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 mb-3 pl-2">
+                            <li>Comprehensive Dashboard for sales & analytics.</li>
+                            <li>Autonomous catalog management (Inventory, Products).</li>
+                            <li>Store Identity Customization (Logo, Banner).</li>
+                            <li>Unique <strong>"Local Orders"</strong> feature to merge offline/online sales.</li>
+                        </ul>
+
+                        <h4 class="font-semibold text-primary dark:text-blue-400 text-sm mb-1"><i class="fas fa-shopping-cart mr-2"></i>For Customers:</h4>
+                        <ul class="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 pl-2">
+                            <li>Advanced search with dynamic filters (price, rating).</li>
+                            <li>Transparency via seller profiles and reviews.</li>
+                            <li>Real-time order tracking status.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Feature Tags -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800">Multi-Vendor</span>
+                    <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800">Dashboard</span>
+                    <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800">Logistics</span>
+                </div>
+
+                <!-- Gallery Grid -->
+                <div class="grid grid-cols-2 gap-3">
+                    <img src="assets/1.png" onclick="openLightbox(this.src)" class="proj-img w-full h-24 object-cover rounded-lg cursor-zoom-in border border-slate-200 dark:border-slate-700 bg-slate-100 shadow-sm">
+                    <img src="assets/2.png" onclick="openLightbox(this.src)" class="proj-img w-full h-24 object-cover rounded-lg cursor-zoom-in border border-slate-200 dark:border-slate-700 bg-slate-100 shadow-sm">
+                    <img src="assets/3.png" onclick="openLightbox(this.src)" class="proj-img w-full h-24 object-cover rounded-lg cursor-zoom-in border border-slate-200 dark:border-slate-700 bg-slate-100 shadow-sm">
+                    <img src="assets/4.png" onclick="openLightbox(this.src)" class="proj-img w-full h-24 object-cover rounded-lg cursor-zoom-in border border-slate-200 dark:border-slate-700 bg-slate-100 shadow-sm">
+                </div>
+            </article>
+
+            <!-- PROJECT 2: GESTIONNAIRE DE DONNÉES -->
+            <article class="glass-card rounded-2xl p-6 md:p-8 hover:shadow-xl transition duration-300 border-t-4 border-indigo-500 relative">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="p-3 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-500">
+                        <i class="fas fa-database text-xl"></i>
+                    </span>
+                    <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">Data Manager</h2>
+                </div>
+
+                <!-- Text Content -->
+                <div class="mb-6 space-y-4">
+                    <div lang="ar">
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-2">نظام إدارة المدارس القرآنية والجمعيات</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                            تطبيق ويب شامل "Full-Stack" يهدف لأتمتة وتنظيم عمل المدارس القرآنية، مستبدلاً الإدارة الورقية بحل رقمي عصري.
+                        </p>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="font-semibold text-indigo-600 dark:text-indigo-400 text-sm"><i class="fas fa-user-graduate ml-2"></i>الإدارة والمتابعة:</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 mr-4">تسجيل الطلاب في حلقات، ومتابعة دقيقة للحفظ، الأحكام، والأداء.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-indigo-600 dark:text-indigo-400 text-sm"><i class="fas fa-coins ml-2"></i>النظام المالي:</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 mr-4">متابعة الرسوم الدراسية (اشتراكات)، إدارة التبرعات، وسجلات مالية كاملة.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-indigo-600 dark:text-indigo-400 text-sm"><i class="fas fa-chart-line ml-2"></i>الإحصائيات:</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 mr-4">لوحة تحكم (Dashboard) تعرض عدد الطلاب، المداخيل، ونسب النجاح.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div lang="fr">
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-2">Système de Gestion pour Écoles Coraniques</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                            Une application web professionnelle "Full-Stack" centralisant la gestion administrative, pédagogique et financière.
+                        </p>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="font-semibold text-indigo-600 dark:text-indigo-400 text-sm"><i class="fas fa-user-graduate mr-2"></i>Administration & Pédagogie :</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 ml-4">Gestion des élèves/groupes et système de notation précis (Hifdh, Ahkam, Adaa).</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-indigo-600 dark:text-indigo-400 text-sm"><i class="fas fa-coins mr-2"></i>Gestion Financière :</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 ml-4">Suivi des paiements/scolarité, historique des transactions et gestion des donations.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-indigo-600 dark:text-indigo-400 text-sm"><i class="fas fa-chart-line mr-2"></i>Analytique :</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 ml-4">Dashboard global des statistiques (Flux financiers, performance académique).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div lang="en">
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-2">Quranic School Management System</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                            A specialized Full-Stack web system streamlining administrative, academic, and financial operations for educational institutions.
+                        </p>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="font-semibold text-indigo-600 dark:text-indigo-400 text-sm"><i class="fas fa-user-graduate mr-2"></i>Admin & Academic:</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 ml-4">Student profiles, Halaqa organization, and specialized tracking (Memorization/Tajweed).</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-indigo-600 dark:text-indigo-400 text-sm"><i class="fas fa-coins mr-2"></i>Financial Suite:</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 ml-4">Tuition fee tracking, transaction history, and donation management modules.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-indigo-600 dark:text-indigo-400 text-sm"><i class="fas fa-chart-line mr-2"></i>Analytics:</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 ml-4">Comprehensive dashboard for school statistics, income flows, and success rates.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Tags -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="text-xs font-semibold px-2 py-1 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">PHP/MySQL</span>
+                    <span class="text-xs font-semibold px-2 py-1 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">Education</span>
+                    <span class="text-xs font-semibold px-2 py-1 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">Finance</span>
+                </div>
+
+                <!-- Placeholder Gallery (Can add images if available later) -->
+                <div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                    <div class="text-center text-slate-400">
+                        <i class="fas fa-chart-pie text-4xl mb-2"></i>
+                        <p class="text-xs">Analytics Dashboard Integration</p>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <footer class="mt-16 text-center text-sm text-slate-500 dark:text-slate-400">
+            <p>&copy; 2026 Mounir Amdouni.</p>
+        </footer>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 z-[100] bg-black/90 hidden flex items-center justify-center p-4" onclick="this.classList.add('hidden')">
+        <img id="lightbox-img" src="" class="max-w-full max-h-full rounded-lg shadow-2xl">
+    </div>
+
+    <script>
+        // --- Language Handling ---
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+            
+            // Toggle visibility using CSS Classes would be better, but inline styles work for simplicity
+            document.querySelectorAll('[lang]').forEach(el => {
+                // If the element has a lang attribute, hide it
+                el.style.display = 'none';
+            });
+            
+            // Show requested lang
+            document.querySelectorAll(`[lang="${lang}"]`).forEach(el => {
+                const tagName = el.tagName;
+                if(tagName === 'SPAN' || tagName === 'I') {
+                    el.style.display = 'inline';
+                } else {
+                    el.style.display = 'block';
+                }
+            });
+
+            // Update Font Family
+            if(lang === 'ar') {
+                document.body.classList.remove('font-inter');
+                document.body.classList.add('font-cairo');
+            } else {
+                document.body.classList.remove('font-cairo');
+                document.body.classList.add('font-inter');
+            }
+            
+            // Button Styling
+            document.querySelectorAll('#btn-ar, #btn-en, #btn-fr').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('text-slate-600', 'dark:text-slate-300');
+            });
+            const activeBtn = document.getElementById(`btn-${lang}`);
+            activeBtn.classList.remove('text-slate-600', 'dark:text-slate-300');
+            activeBtn.classList.add('bg-primary', 'text-white');
+        }
+
+        // --- Theme Handling ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                initParticles('light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                initParticles('dark');
+            }
+        }
+
+        // --- Lightbox ---
+        function openLightbox(src) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').classList.remove('hidden');
+        }
+
+        // --- Particle Background ---
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animationId;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor(mode) {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                // Bigger & Varied Size
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.8;
+                this.speedY = (Math.random() - 0.5) * 0.8;
+                
+                // Colorful Particles
+                const colors = mode === 'dark' 
+                    ? ['100, 200, 255', '147, 51, 234', '56, 189, 248'] // Blue, Purple, Sky
+                    : ['37, 99, 235', '126, 34, 206', '14, 165, 233'];   // Darker Blue, Purple, Sky
+                
+                this.baseColor = colors[Math.floor(Math.random() * colors.length)];
+                this.alpha = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(' + this.baseColor + ',' + this.alpha + ')';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles(mode) {
+            cancelAnimationFrame(animationId);
+            particles = [];
+            const count = window.innerWidth < 768 ? 50 : 100;
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(mode));
+            }
+            animate();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            animationId = requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            const mode = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            initParticles(mode);
+        });
+
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            resizeCanvas();
+            setLanguage('ar'); // Default
+            
+            // Check System Pref or Storage
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.classList.remove('dark');
+                initParticles('light');
+            } else {
+                document.documentElement.classList.add('dark');
+                initParticles('dark');
+            }
+        });
+
+    </script>
 </body>
 </html>
